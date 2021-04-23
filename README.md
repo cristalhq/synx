@@ -11,6 +11,10 @@ Better `sync` package for Go.
 
 TODO.
 
+## Note
+
+For better `sync/atomic` package see [atomix](https://github.com/cristalhq/atomix).
+
 ## Features
 
 * Simple API.
