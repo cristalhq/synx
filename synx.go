@@ -35,10 +35,10 @@ func Send(ctx context.Context, ch chan<- interface{}, value interface{}) error {
 }
 
 // Recv from the channel with a context.
-func Recv(ctx context.Context, ch <-chan interface{}) (value interface{}, stillOpen bool, err error) {
+func Recv(ctx context.Context, ch <-chan interface{}) (value interface{}, isOpen bool, err error) {
 	select {
-	case value, stillOpen = <-ch:
-		return value, stillOpen, nil
+	case value, isOpen = <-ch:
+		return value, isOpen, nil
 	case <-ctx.Done():
 		return nil, false, ctx.Err()
 	}
