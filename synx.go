@@ -83,3 +83,17 @@ func Wait(ctx context.Context, wg *sync.WaitGroup) error {
 		return nil
 	}
 }
+
+// With given lock call f.
+func With(lock sync.Locker, f func()) {
+	lock.Lock()
+	defer lock.Unlock()
+	f()
+}
+
+// WithRead lock do f.
+func WithRead(mu *sync.RWMutex, f func()) {
+	mu.RLock()
+	defer mu.RUnlock()
+	f()
+}
