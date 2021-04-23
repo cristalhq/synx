@@ -25,7 +25,7 @@ func BlockForever() {
 }
 
 // LockInScope should be used with the defer.
-//	defer synx.LockInScope(mu)
+//	defer synx.LockInScope(mu)()
 //
 func LockInScope(lock *sync.Mutex) (unlock func()) {
 	lock.Lock()
@@ -33,7 +33,7 @@ func LockInScope(lock *sync.Mutex) (unlock func()) {
 }
 
 // RWLockInScope should be used with the defer.
-//	defer synx.RLockInScope(mu)
+//	defer synx.RLockInScope(mu)()
 //
 func RWLockInScope(lock *sync.RWMutex) (unlock func()) {
 	lock.Lock()
@@ -41,7 +41,7 @@ func RWLockInScope(lock *sync.RWMutex) (unlock func()) {
 }
 
 // RLockInScope should be used with the defer.
-//	defer synx.RLockInScope(mu)
+//	defer synx.RLockInScope(mu)()
 //
 func RLockInScope(lock *sync.RWMutex) (unlock func()) {
 	lock.RLock()
