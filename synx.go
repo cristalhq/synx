@@ -24,30 +24,6 @@ func BlockForever() {
 	select {}
 }
 
-// LockInScope should be used with the defer.
-//	defer synx.LockInScope(mu)()
-//
-func LockInScope(lock *sync.Mutex) (unlock func()) {
-	lock.Lock()
-	return lock.Unlock
-}
-
-// RWLockInScope should be used with the defer.
-//	defer synx.RLockInScope(mu)()
-//
-func RWLockInScope(lock *sync.RWMutex) (unlock func()) {
-	lock.Lock()
-	return lock.Unlock
-}
-
-// RLockInScope should be used with the defer.
-//	defer synx.RLockInScope(mu)()
-//
-func RLockInScope(lock *sync.RWMutex) (unlock func()) {
-	lock.RLock()
-	return lock.RUnlock
-}
-
 // Send to the channel with a context.
 func Send(ctx context.Context, ch chan<- interface{}, value interface{}) error {
 	select {
