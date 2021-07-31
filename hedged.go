@@ -35,6 +35,7 @@ func NewHedger(timeout time.Duration, upto int, worker HedgedWorker) HedgedWorke
 		worker:  worker,
 		timeout: timeout,
 		upto:    upto,
+		wp:      NewWorkerPool(10, time.Minute),
 	}
 	return hedged
 }
@@ -43,6 +44,7 @@ type hedgedWorker struct {
 	worker  HedgedWorker
 	timeout time.Duration
 	upto    int
+	wp      *WorkerPool
 }
 
 func (ht *hedgedWorker) Execute(ctx context.Context, input interface{}) (interface{}, error) {
@@ -56,7 +58,7 @@ func (ht *hedgedWorker) Execute(ctx context.Context, input interface{}) (interfa
 	resultIdx := -1
 	cancels := make([]func(), ht.upto)
 
-	defer RunAsync(func() {
+	defer ht.wp.Do(func() {
 		for i, cancel := range cancels {
 			if i != resultIdx && cancel != nil {
 				cancel()
@@ -70,7 +72,7 @@ func (ht *hedgedWorker) Execute(ctx context.Context, input interface{}) (interfa
 			subCtx, cancel := context.WithCancel(ctx)
 			cancels[idx] = cancel
 
-			RunAsync(func() {
+			ht.wp.Do(func() {
 				result, err := ht.worker.Execute(subCtx, input)
 				if err != nil {
 					errorCh <- err
