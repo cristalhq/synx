@@ -1,32 +1,50 @@
 package synx
 
-import "time"
+import (
+	"sync/atomic"
+	"time"
+)
 
-var taskQueue = make(chan func())
+type WorkerPool struct {
+	activeWorkers int64
+	maxWorkers    int64
+	lifetime      time.Duration
+	taskQueue     chan func()
+}
 
-const workerLifetime = 10 * time.Second
+func NewWorkerPool(maxWorkers int, lifetime time.Duration) *WorkerPool {
+	return &WorkerPool{
+		maxWorkers: int64(maxWorkers),
+		lifetime:   lifetime,
+		taskQueue:  make(chan func()),
+	}
+}
 
-// RunAsync a given task. Task will be executed by a worker pool.
-// If there is no free worker - new worker will be created.
-// Worker without tasks will be finished after workerLifetime.
-func RunAsync(task func()) {
+func (wp *WorkerPool) Do(task func()) {
 	select {
-	case taskQueue <- task:
-		// submited, everything is ok
+	case wp.taskQueue <- task:
+		// submitted, everything is ok
 
 	default:
-		go func() {
-			// do the given task
-			task()
+		if wp.maxWorkers <= atomic.LoadInt64(&wp.activeWorkers) {
+			wp.taskQueue <- task
+			return
+		}
 
-			tick := time.NewTicker(workerLifetime)
+		go func() {
+			atomic.AddInt64(&wp.activeWorkers, 1)
+			defer atomic.AddInt64(&wp.activeWorkers, -1)
+
+			task() // do the given task
+
+			tick := time.NewTicker(wp.lifetime)
 			defer tick.Stop()
 
 			for {
 				select {
-				case t := <-taskQueue:
+				case t := <-wp.taskQueue:
 					t()
-					tick.Reset(workerLifetime)
+					tick.Reset(wp.lifetime)
 				case <-tick.C:
 					return
 				}
