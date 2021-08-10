@@ -19,7 +19,10 @@ func NewOnce() *Once {
 
 // Do has same behaviour as sync.Once.
 func (o *Once) Do(f func()) {
-	o.once.Do(f)
+	o.once.Do(func() {
+		f()
+		close(o.doneCh)
+	})
 }
 
 // DoneChan returns a channel that will be closed on completion.
