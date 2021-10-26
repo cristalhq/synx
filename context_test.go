@@ -11,6 +11,10 @@ func TestContextFromSignal(t *testing.T) {
 	ch := make(chan struct{})
 	ctx := ContextFromSignal(ch)
 
+	if val := ctx.Value("anything"); val != nil {
+		t.Fatal("must store nothing")
+	}
+
 	deadline, ok := ctx.Deadline()
 	if want := (time.Time{}); ok || !want.Equal(deadline) {
 		t.Fatalf("want (%v, %v) got (%v, %v)", want, false, deadline, ok)
@@ -38,5 +42,9 @@ func TestContextFromSignal(t *testing.T) {
 	case <-ctx.Done():
 	default:
 		t.Fatal("must be done already")
+	}
+
+	if err := ctx.Err(); err == nil {
+		t.Fatal("must be nil")
 	}
 }
