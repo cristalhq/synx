@@ -44,12 +44,12 @@ func Recv(ctx context.Context, ch <-chan interface{}) (value interface{}, isOpen
 	}
 }
 
-// Wait for a sync.WaitGroup with context.
-func Wait(ctx context.Context, wg *sync.WaitGroup) error {
+// Wait for a function to finish with context.
+func Wait(ctx context.Context, fn func()) error {
 	ch := make(chan struct{})
 	go func() {
 		defer close(ch)
-		wg.Wait()
+		fn()
 	}()
 
 	select {
