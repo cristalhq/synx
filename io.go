@@ -6,12 +6,6 @@ import (
 	"sync"
 )
 
-type readerFn func(p []byte) (n int, err error)
-
-func (rf readerFn) Read(p []byte) (n int, err error) {
-	return rf(p)
-}
-
 // Copy with cancellation.
 func Copy(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
 	readerCtx := readerFn(func(p []byte) (int, error) {
@@ -25,6 +19,12 @@ func Copy(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
 
 	written, err := io.Copy(dst, readerCtx)
 	return written, err
+}
+
+type readerFn func(p []byte) (n int, err error)
+
+func (rf readerFn) Read(p []byte) (n int, err error) {
+	return rf(p)
 }
 
 // SafeReader synchronizes concurrent reads to the underlying io.Writer.
