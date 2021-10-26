@@ -1,22 +1,20 @@
 package synx
 
 import (
-	"sync/atomic"
 	"time"
 )
 
 type WorkerPool struct {
-	activeWorkers int64
-	maxWorkers    int64
-	lifetime      time.Duration
-	taskQueue     chan func()
+	lifetime  time.Duration
+	semaphore chan struct{}
+	taskQueue chan func()
 }
 
 func NewWorkerPool(maxWorkers int, lifetime time.Duration) *WorkerPool {
 	return &WorkerPool{
-		maxWorkers: int64(maxWorkers),
-		lifetime:   lifetime,
-		taskQueue:  make(chan func()),
+		lifetime:  lifetime,
+		semaphore: make(chan struct{}, maxWorkers),
+		taskQueue: make(chan func()),
 	}
 }
 
@@ -25,30 +23,26 @@ func (wp *WorkerPool) Do(task func()) {
 	case wp.taskQueue <- task:
 		// submitted, everything is ok
 
-	default:
-		if wp.maxWorkers <= atomic.LoadInt64(&wp.activeWorkers) {
-			wp.taskQueue <- task
+	case wp.semaphore <- struct{}{}:
+		go wp.startWorker(task)
+	}
+}
+
+func (wp *WorkerPool) startWorker(task func()) {
+	defer func() { <-wp.semaphore }()
+
+	task() // do the given task
+
+	tick := time.NewTicker(wp.lifetime)
+	defer tick.Stop()
+
+	for {
+		select {
+		case t := <-wp.taskQueue:
+			t()
+			tick.Reset(wp.lifetime)
+		case <-tick.C:
 			return
 		}
-
-		go func() {
-			atomic.AddInt64(&wp.activeWorkers, 1)
-			defer atomic.AddInt64(&wp.activeWorkers, -1)
-
-			task() // do the given task
-
-			tick := time.NewTicker(wp.lifetime)
-			defer tick.Stop()
-
-			for {
-				select {
-				case t := <-wp.taskQueue:
-					t()
-					tick.Reset(wp.lifetime)
-				case <-tick.C:
-					return
-				}
-			}
-		}()
 	}
 }
