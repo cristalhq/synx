@@ -48,3 +48,49 @@ func TestContextFromSignal(t *testing.T) {
 		t.Fatal("must be nil")
 	}
 }
+
+func TestWithCancel(t *testing.T) {
+	ctx, cancel := WithCancel()
+
+	if err := ctx.Err(); err != nil {
+		t.Fatal(err)
+	}
+
+	cancel()
+
+	select {
+	case <-ctx.Done():
+	default:
+		t.Fatal()
+	}
+}
+
+func TestWithDeadline(t *testing.T) {
+	ctx, cancel := WithDeadline(time.Now().Add(100 * time.Millisecond))
+	defer cancel()
+
+	if err := ctx.Err(); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case <-ctx.Done():
+	case <-time.After(150 * time.Millisecond):
+		t.Fatal()
+	}
+}
+
+func TestWithTimeout(t *testing.T) {
+	ctx, cancel := WithTimeout(100 * time.Millisecond)
+	defer cancel()
+
+	if err := ctx.Err(); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case <-ctx.Done():
+	case <-time.After(150 * time.Millisecond):
+		t.Fatal()
+	}
+}

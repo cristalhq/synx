@@ -23,3 +23,18 @@ func (c chanCtx) Err() error {
 		return nil
 	}
 }
+
+// WithCancel is a shortcut for context.WithCancel with context.Background as parent.
+func WithCancel() (context.Context, context.CancelFunc) {
+	return context.WithCancel(context.Background())
+}
+
+// WithDeadline is a shortcut for context.WithDeadline with context.Background as parent.
+func WithDeadline(d time.Time) (context.Context, context.CancelFunc) {
+	return context.WithDeadline(context.Background(), d)
+}
+
+// WithTimeout is a shortcut for context.WithTimeout with context.Background as parent.
+func WithTimeout(timeout time.Duration) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), timeout)
+}
