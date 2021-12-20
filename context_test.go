@@ -104,3 +104,21 @@ func TestContextWithoutValues(t *testing.T) {
 		t.Fatalf("got %v, want %v", got, nil)
 	}
 }
+
+func TestContextWithValues(t *testing.T) {
+	ctx := context.WithValue(context.Background(), "foo", "bar")
+	ctx = ContextWithValues(ctx, map[interface{}]interface{}{
+		"a": "b",
+		10:  20,
+	})
+
+	if got := ctx.Value("foo"); got != "bar" {
+		t.Fatalf("got %v, want %v", got, "bar")
+	}
+	if got := ctx.Value("a"); got != "b" {
+		t.Fatalf("got %v, want %v", got, nil)
+	}
+	if got := ctx.Value(10); got != 20 {
+		t.Fatalf("got %v, want %v", got, nil)
+	}
+}

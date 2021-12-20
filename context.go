@@ -50,3 +50,24 @@ func (c *contextWithoutValues) Deadline() (time.Time, bool)     { return c.Deadl
 func (c *contextWithoutValues) Done() <-chan struct{}           { return c.Done() }
 func (c *contextWithoutValues) Err() error                      { return c.Err() }
 func (c *contextWithoutValues) Value(_ interface{}) interface{} { return nil }
+
+// ContextWithValues creates a new context based on ctx and map of values.
+// Shorter version of context.WithValue in a loop.
+func ContextWithValues(ctx context.Context, values map[interface{}]interface{}) context.Context {
+	return &multiValuesCtx{
+		Context: ctx,
+		values:  values,
+	}
+}
+
+type multiValuesCtx struct {
+	context.Context
+	values map[interface{}]interface{}
+}
+
+func (c *multiValuesCtx) Value(key interface{}) interface{} {
+	if val, ok := c.values[key]; ok {
+		return val
+	}
+	return c.Context.Value(key)
+}
