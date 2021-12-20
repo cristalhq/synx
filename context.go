@@ -38,3 +38,15 @@ func WithDeadline(d time.Time) (context.Context, context.CancelFunc) {
 func WithTimeout(timeout time.Duration) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), timeout)
 }
+
+// ContextWithoutValues returns context without any value set. However new values can be added.
+func ContextWithoutValues(ctx context.Context) context.Context {
+	return &contextWithoutValues{ctx}
+}
+
+type contextWithoutValues struct{ context.Context }
+
+func (c *contextWithoutValues) Deadline() (time.Time, bool)     { return c.Deadline() }
+func (c *contextWithoutValues) Done() <-chan struct{}           { return c.Done() }
+func (c *contextWithoutValues) Err() error                      { return c.Err() }
+func (c *contextWithoutValues) Value(_ interface{}) interface{} { return nil }

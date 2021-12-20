@@ -1,6 +1,7 @@
 package synx
 
 import (
+	"context"
 	"testing"
 	"time"
 )
@@ -92,5 +93,14 @@ func TestWithTimeout(t *testing.T) {
 	case <-ctx.Done():
 	case <-time.After(150 * time.Millisecond):
 		t.Fatal()
+	}
+}
+
+func TestContextWithoutValues(t *testing.T) {
+	ctx := context.WithValue(context.Background(), "foo", "bar")
+	ctx = ContextWithoutValues(ctx)
+
+	if got := ctx.Value("foo"); got != nil {
+		t.Fatalf("got %v, want %v", got, nil)
 	}
 }
