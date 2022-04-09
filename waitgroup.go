@@ -1,12 +1,12 @@
 package synx
 
 import (
-	"sync/atomic"
+	"sync"
 )
 
 // WaitGroup is like sync.WaitGroup with a signal channel.
 type WaitGroup struct {
-	n      int64
+	wg     sync.WaitGroup
 	doneCh chan struct{}
 }
 
@@ -17,24 +17,33 @@ func NewWaitGroup() *WaitGroup {
 	}
 }
 
+// Go run the given fn guarded with a wait group.
+func (wg *WaitGroup) Go(fn func()) {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		fn()
+	}()
+}
+
 // Add has same behaviour as sync.WaitGroup.
 func (wg *WaitGroup) Add(delta int) {
-	if n := atomic.AddInt64(&wg.n, int64(delta)); n == 0 {
-		close(wg.doneCh)
-	}
+	wg.wg.Add(delta)
 }
 
 // Done has same behaviour as sync.WaitGroup.
 func (wg *WaitGroup) Done() {
-	wg.Add(-1)
+	wg.wg.Done()
 }
 
 // Wait has same behaviour as sync.WaitGroup.
 func (wg *WaitGroup) Wait() {
-	<-wg.doneCh
+	wg.wg.Wait()
+	close(wg.doneCh)
 }
 
 // DoneChan returns a channel that will be closed on completion.
+// Note: Wait method must be executed by the user to make it work.
 func (wg *WaitGroup) DoneChan() <-chan struct{} {
 	return wg.doneCh
 }
