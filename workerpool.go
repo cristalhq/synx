@@ -38,8 +38,8 @@ func (wp *WorkerPool) startWorker(task func()) {
 
 	for {
 		select {
-		case t := <-wp.taskQueue:
-			t()
+		case task := <-wp.taskQueue:
+			task()
 			tick.Reset(wp.lifetime)
 		case <-tick.C:
 			return
