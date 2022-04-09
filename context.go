@@ -46,9 +46,6 @@ func ContextWithoutValues(ctx context.Context) context.Context {
 
 type contextWithoutValues struct{ context.Context }
 
-func (c *contextWithoutValues) Deadline() (time.Time, bool)     { return c.Deadline() }
-func (c *contextWithoutValues) Done() <-chan struct{}           { return c.Done() }
-func (c *contextWithoutValues) Err() error                      { return c.Err() }
 func (c *contextWithoutValues) Value(_ interface{}) interface{} { return nil }
 
 // ContextWithValues creates a new context based on ctx and map of values.
