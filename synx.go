@@ -25,7 +25,7 @@ func BlockForever() {
 }
 
 // Send to the channel with a context.
-func Send(ctx context.Context, ch chan<- interface{}, value interface{}) error {
+func Send[T any](ctx context.Context, ch chan<- T, value T) error {
 	select {
 	case ch <- value:
 		return nil
@@ -35,12 +35,13 @@ func Send(ctx context.Context, ch chan<- interface{}, value interface{}) error {
 }
 
 // Recv from the channel with a context.
-func Recv(ctx context.Context, ch <-chan interface{}) (value interface{}, isOpen bool, err error) {
+func Recv[T any](ctx context.Context, ch <-chan T) (value T, isOpen bool, err error) {
 	select {
 	case value, isOpen = <-ch:
 		return value, isOpen, nil
 	case <-ctx.Done():
-		return nil, false, ctx.Err()
+		var zero T
+		return zero, false, ctx.Err()
 	}
 }
 
