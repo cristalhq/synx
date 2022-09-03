@@ -10,6 +10,7 @@ import (
 func ExampleBreaker() {
 	cb, err := synx.NewBreaker(&synx.BreakerConfig{
 		Resolution:         10 * time.Millisecond,
+		Requests:           1000,
 		FailRatio:          0.25,
 		HalfOpenFailRatio:  0.5,
 		HalfOpenAllowRatio: 0.5,

@@ -24,6 +24,10 @@ type BreakerConfig struct {
 	// Default is 0 which is treated as 1 second.
 	Resolution time.Duration
 
+	// Requests is a minimal amount of request that can be made without breaker policy.
+	// Default is 0 which is treated as 100.
+	Requests int64
+
 	// FailRatio defines when breaker switches Closed -> Open (or HalfOpen if Flexible).
 	// Value must be in range [0, 1] (including both border values).
 	FailRatio float64
@@ -49,6 +53,9 @@ func (cfg *BreakerConfig) Validate() error {
 	}
 	if cfg.Resolution == 0 {
 		cfg.Resolution = time.Second
+	}
+	if cfg.Requests == 0 {
+		cfg.Requests = 100
 	}
 	if cfg.FailRatio < 0 || cfg.FailRatio > 1 {
 		return fmt.Errorf("FailPercent must be between 0 and 1, got: %v", cfg.FailRatio)
@@ -148,7 +155,7 @@ func (cb *Breaker) doAllow(state state, now int64) bool {
 
 	successes, fails := atomic.LoadInt32(&cb.successes), atomic.LoadInt32(&cb.fails)
 	total := int64(successes + fails)
-	if total == 0 {
+	if total == 0 || total < cb.cfg.Requests {
 		cb.toState(BreakerStateClosed, now)
 		return true
 	}
