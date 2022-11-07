@@ -45,9 +45,9 @@ func (cg *ContextGroup) Cancel() {
 	cg.cancel()
 }
 
-// Wait blocks until all function calls have returned.
+// WaitErr blocks until all function calls have returned.
 // Returns the first non-nil error (if any).
-func (cg *ContextGroup) Wait() error {
+func (cg *ContextGroup) WaitErr() error {
 	cg.wg.Wait()
 	cg.cancel()
 	return cg.err
