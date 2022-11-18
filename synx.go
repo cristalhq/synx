@@ -74,3 +74,12 @@ func WithRead(mu *sync.RWMutex, f func()) {
 	defer mu.RUnlock()
 	f()
 }
+
+func Async(fn func()) <-chan struct{} {
+	ch := make(chan struct{})
+	go func() {
+		defer close(ch)
+		fn()
+	}()
+	return ch
+}

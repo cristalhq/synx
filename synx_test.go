@@ -56,3 +56,15 @@ func TestWaitFail(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestAsync(t *testing.T) {
+	done := Async(func() {
+		time.Sleep(10 * time.Millisecond)
+	})
+
+	select {
+	case <-done:
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("timeout")
+	}
+}
