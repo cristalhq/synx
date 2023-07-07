@@ -39,6 +39,21 @@ func WithTimeout(timeout time.Duration) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), timeout)
 }
 
+// used as a context key in WithValue and GetValue.
+type ctxKey[T any] struct{}
+
+// WithValue attaches val to the context. Use GetValue to get this value back.
+func WithValue[T any](ctx context.Context, val T) context.Context {
+	return context.WithValue(ctx, ctxKey[T]{}, val)
+}
+
+// GetValue returns the value T attached to the context.
+// If there is no value attached, the zero value is returned.
+func GetValue[T any](ctx context.Context) T {
+	val, _ := ctx.Value(ctxKey[T]{}).(T)
+	return val
+}
+
 // ContextWithoutValues returns context without any value set. However new values can be added.
 func ContextWithoutValues(ctx context.Context) context.Context {
 	return &contextWithoutValues{ctx}

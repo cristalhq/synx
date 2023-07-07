@@ -105,6 +105,31 @@ func TestContextWithoutValues(t *testing.T) {
 	}
 }
 
+func TestContextCtxKey(t *testing.T) {
+	type UserID int64
+	type TeamID int64
+
+	if any(ctxKey[UserID]{}) == any(ctxKey[TeamID]{}) {
+		t.Fatal()
+	}
+}
+
+func TestContextGetValue(t *testing.T) {
+	type UserID int64
+	type UnknownID int64
+
+	ctx := context.Background()
+	ctx = WithValue(ctx, UserID(10))
+
+	if got := GetValue[UserID](ctx); got != 10 {
+		t.Fatalf("got %v, want %v", got, nil)
+	}
+
+	if got := GetValue[UnknownID](ctx); got != 0 {
+		t.Fatalf("got %v, want %v", got, nil)
+	}
+}
+
 func TestContextWithValues(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "foo", "bar")
 	ctx = ContextWithValues(ctx, map[interface{}]interface{}{
