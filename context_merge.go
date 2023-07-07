@@ -91,7 +91,7 @@ func (ctx *mergedContext) Err() error {
 }
 
 // Value implements context.Context
-func (ctx *mergedContext) Value(key interface{}) interface{} {
+func (ctx *mergedContext) Value(key any) any {
 	if v := ctx.ctx1.Value(key); v != nil {
 		return v
 	}

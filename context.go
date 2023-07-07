@@ -12,9 +12,9 @@ func ContextFromSignal(c <-chan struct{}) context.Context {
 
 type chanCtx <-chan struct{}
 
-func (c chanCtx) Done() <-chan struct{}         { return c }
-func (chanCtx) Deadline() (time.Time, bool)     { return time.Time{}, false }
-func (c chanCtx) Value(interface{}) interface{} { return nil }
+func (c chanCtx) Done() <-chan struct{}     { return c }
+func (chanCtx) Deadline() (time.Time, bool) { return time.Time{}, false }
+func (c chanCtx) Value(any) any             { return nil }
 func (c chanCtx) Err() error {
 	select {
 	case <-c.Done():
@@ -46,11 +46,11 @@ func ContextWithoutValues(ctx context.Context) context.Context {
 
 type contextWithoutValues struct{ context.Context }
 
-func (c *contextWithoutValues) Value(_ interface{}) interface{} { return nil }
+func (c *contextWithoutValues) Value(_ any) any { return nil }
 
 // ContextWithValues creates a new context based on ctx and map of values.
 // Shorter version of context.WithValue in a loop.
-func ContextWithValues(ctx context.Context, values map[interface{}]interface{}) context.Context {
+func ContextWithValues(ctx context.Context, values map[any]any) context.Context {
 	return &multiValuesCtx{
 		Context: ctx,
 		values:  values,
@@ -59,10 +59,10 @@ func ContextWithValues(ctx context.Context, values map[interface{}]interface{}) 
 
 type multiValuesCtx struct {
 	context.Context
-	values map[interface{}]interface{}
+	values map[any]any
 }
 
-func (c *multiValuesCtx) Value(key interface{}) interface{} {
+func (c *multiValuesCtx) Value(key any) any {
 	if val, ok := c.values[key]; ok {
 		return val
 	}

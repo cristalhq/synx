@@ -39,7 +39,7 @@ func TestDumpContext(t *testing.T) {
 
 	testCases := []struct {
 		ctx        context.Context
-		wantValues map[interface{}]interface{}
+		wantValues map[any]any
 	}{
 		{
 			ctx:        nil,
@@ -47,27 +47,27 @@ func TestDumpContext(t *testing.T) {
 		},
 		{
 			ctx:        context.Background(),
-			wantValues: map[interface{}]interface{}{},
+			wantValues: map[any]any{},
 		},
 		{
 			ctx:        withCancel(context.Background()),
-			wantValues: map[interface{}]interface{}{},
+			wantValues: map[any]any{},
 		},
 		{
 			ctx:        withTimeout(context.Background()),
-			wantValues: map[interface{}]interface{}{},
+			wantValues: map[any]any{},
 		},
 		{
 			ctx:        withDeadline(context.Background()),
-			wantValues: map[interface{}]interface{}{},
+			wantValues: map[any]any{},
 		},
 		{
 			ctx:        withNop(context.Background()),
-			wantValues: map[interface{}]interface{}{},
+			wantValues: map[any]any{},
 		},
 		{
 			ctx: context.WithValue(context.Background(), "foo", "bar"),
-			wantValues: map[interface{}]interface{}{
+			wantValues: map[any]any{
 				"foo": "bar",
 			},
 		},
@@ -76,7 +76,7 @@ func TestDumpContext(t *testing.T) {
 				context.WithValue(context.Background(), "foo1", "bar1"),
 				"foo2", "bar2"),
 				"foo3", "bar3"),
-			wantValues: map[interface{}]interface{}{
+			wantValues: map[any]any{
 				"foo1": "bar1",
 				"foo2": "bar2",
 				"foo3": "bar3",
@@ -90,7 +90,7 @@ func TestDumpContext(t *testing.T) {
 					), "foo2", "bar2"),
 				), "foo3", "bar3"),
 			),
-			wantValues: map[interface{}]interface{}{
+			wantValues: map[any]any{
 				"foo":  "bar",
 				"foo2": "bar2",
 				"foo3": "bar3",
@@ -104,7 +104,7 @@ func TestDumpContext(t *testing.T) {
 					), "foo2", "bar2"),
 				), "foo3", "bar3"),
 			),
-			wantValues: map[interface{}]interface{}{
+			wantValues: map[any]any{
 				"foo2": "bar2",
 				"foo3": "bar3",
 			},
