@@ -8,17 +8,6 @@ import (
 // Signal channel.
 type Signal = chan struct{}
 
-var closedChan = func() <-chan struct{} {
-	ch := make(chan struct{})
-	close(ch)
-	return ch
-}()
-
-// ClosedChan returns a closed struct{} channel.
-func ClosedChan() <-chan struct{} {
-	return closedChan
-}
-
 // BlockForever the calling goroutine.
 func BlockForever() {
 	select {}
@@ -40,18 +29,24 @@ func Recv[T any](ctx context.Context, ch <-chan T) (value T, isOpen bool, err er
 	case value, isOpen = <-ch:
 		return value, isOpen, nil
 	case <-ctx.Done():
-		var zero T
-		return zero, false, ctx.Err()
+		return value, false, ctx.Err()
 	}
 }
 
-// Wait for a function to finish with context.
-func Wait(ctx context.Context, fn func()) error {
+// Async executes fn in a goroutine.
+// Returned channel is closed when goroutine completes.
+func Async(fn func()) <-chan struct{} {
 	ch := make(chan struct{})
 	go func() {
 		defer close(ch)
 		fn()
 	}()
+	return ch
+}
+
+// Wait for a function to finish.
+func Wait(ctx context.Context, fn func()) error {
+	ch := Async(fn)
 
 	select {
 	case <-ctx.Done():
@@ -61,25 +56,16 @@ func Wait(ctx context.Context, fn func()) error {
 	}
 }
 
-// With given lock call f.
-func With(lock sync.Locker, f func()) {
-	lock.Lock()
-	defer lock.Unlock()
-	f()
+// Locked call of fn.
+func Locked(mu *sync.Mutex, fn func()) {
+	mu.Lock()
+	defer mu.Unlock()
+	fn()
 }
 
-// WithRead lock do f.
-func WithRead(mu *sync.RWMutex, f func()) {
+// RLocked call of fn.
+func RLocked(mu *sync.RWMutex, fn func()) {
 	mu.RLock()
 	defer mu.RUnlock()
-	f()
-}
-
-func Async(fn func()) <-chan struct{} {
-	ch := make(chan struct{})
-	go func() {
-		defer close(ch)
-		fn()
-	}()
-	return ch
+	fn()
 }

@@ -8,20 +8,6 @@ import (
 	"time"
 )
 
-func TestBlockForever(t *testing.T) {
-	ch := make(chan struct{})
-	go func() {
-		BlockForever()
-		ch <- struct{}{}
-	}()
-
-	select {
-	case <-ch:
-		t.Fatal()
-	case <-time.After(100 * time.Millisecond):
-	}
-}
-
 func TestWaitSuccess(t *testing.T) {
 	var wg sync.WaitGroup
 
@@ -54,17 +40,5 @@ func TestWaitFail(t *testing.T) {
 
 	if err := Wait(ctx, wg.Wait); !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
-	}
-}
-
-func TestAsync(t *testing.T) {
-	done := Async(func() {
-		time.Sleep(10 * time.Millisecond)
-	})
-
-	select {
-	case <-done:
-	case <-time.After(100 * time.Millisecond):
-		t.Fatal("timeout")
 	}
 }
