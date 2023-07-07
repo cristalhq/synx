@@ -11,7 +11,7 @@ const infiniteTimeout = 30 * 24 * time.Hour // domain specific infinite
 
 // HedgedWorker ...
 type HedgedWorker interface {
-	Execute(ctx context.Context, input interface{}) (result interface{}, err error)
+	Execute(ctx context.Context, input any) (result any, err error)
 }
 
 // NewHedger returns a new http.RoundTripper which implements hedged requests pattern.
@@ -47,7 +47,7 @@ type hedgedWorker struct {
 	wp      *WorkerPool
 }
 
-func (ht *hedgedWorker) Execute(ctx context.Context, input interface{}) (interface{}, error) {
+func (ht *hedgedWorker) Execute(ctx context.Context, input any) (any, error) {
 	mainCtx := ctx
 
 	var timeout time.Duration
@@ -130,7 +130,7 @@ func waitResult(ctx context.Context, resultCh <-chan indexedResult, errorCh <-ch
 
 type indexedResult struct {
 	Index  int
-	Result interface{}
+	Result any
 }
 
 // MultiError is an error type to track multiple errors. This is used to

@@ -7,12 +7,12 @@ import (
 )
 
 // DumpContext values. Works for stdlib contexts only.
-func DumpContext(ctx context.Context) map[interface{}]interface{} {
+func DumpContext(ctx context.Context) map[any]any {
 	if ctx == nil {
 		return nil
 	}
 
-	values := map[interface{}]interface{}{}
+	values := map[any]any{}
 	for {
 		// cannot use type-switch here because those types are unexported
 		switch fmt.Sprintf("%T", ctx) {
@@ -41,7 +41,7 @@ type iface struct {
 // Same as of context.(valueCtx)
 type valueCtx struct {
 	context.Context
-	key, value interface{}
+	key, value any
 }
 
 // Same as context.(*timerCtx) and context.(*cancelCtx)

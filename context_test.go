@@ -132,7 +132,7 @@ func TestContextGetValue(t *testing.T) {
 
 func TestContextWithValues(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "foo", "bar")
-	ctx = ContextWithValues(ctx, map[interface{}]interface{}{
+	ctx = ContextWithValues(ctx, map[any]any{
 		"a": "b",
 		10:  20,
 	})
