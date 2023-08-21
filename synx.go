@@ -13,26 +13,6 @@ func BlockForever() {
 	select {}
 }
 
-// Send to the channel with a context.
-func Send[T any](ctx context.Context, ch chan<- T, value T) error {
-	select {
-	case ch <- value:
-		return nil
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-}
-
-// Recv from the channel with a context.
-func Recv[T any](ctx context.Context, ch <-chan T) (value T, isOpen bool, err error) {
-	select {
-	case value, isOpen = <-ch:
-		return value, isOpen, nil
-	case <-ctx.Done():
-		return value, false, ctx.Err()
-	}
-}
-
 // Async executes fn in a goroutine.
 // Returned channel is closed when goroutine completes.
 func Async(fn func()) <-chan struct{} {
