@@ -44,6 +44,8 @@ type BreakerConfig struct {
 	// In the original circuit breaker design Close switches to Open only.
 	// Default is false.
 	Flexible bool
+
+	_ struct{} // enforce explicit field names.
 }
 
 // Validate the config.
